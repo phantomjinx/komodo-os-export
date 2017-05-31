@@ -1,13 +1,33 @@
 #!/bin/bash
+
+JBOSS_HOME=/wildfly
+TEIID_VERSION=9.2.3
+TEIID_ZIP=teiid-${TEIID_VERSION}-wildfly-dist.zip
+TEIID_URL=https://repository.jboss.org/nexus/service/local/repositories/releases/content/org/jboss/teiid/teiid/${TEIID_VERSION}/${TEIID_ZIP}
+
 echo "Before assembling"
 
 /usr/libexec/s2i/assemble
 rc=$?
 
-if [ $rc -eq 0 ]; then
-    echo "After successful assembling"
-else
-    echo "After failed assembling"
+if [ $rc -ne 0 ]; then
+  echo "wildfly assembly failed ... aborting";
+  exit $rc
 fi
+
+curl -o ${JBOSS_HOME}/${TEIID_ZIP} ${TEIID_URL}
+
+if [ ! -f ${JBOSS_HOME}/${TEIID_ZIP} ]; then
+  echo "Failed to download teiid zip ... aborting"
+  exit 1;
+fi
+
+# Change to JBOSS HOME
+cd ${JBOSS_HOME}
+unzip ${TEIID_ZIP}
+rm ${JBOSS_HOME}/${TEIID_ZIP}
+
+# Copy wildfly configuration
+cp -rf ${HOME}/contrib/wfcfg/* ${JBOSS_HOME}/standalone/configuration/
 
 exit $rc
