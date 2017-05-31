@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<vdb name="testDS1VDB" version="1">
+
+<property name="dsbOwner" value="user"/>
+<property name="dsbTeiidStatus" value="Active"/>
+<property name="dsbTeiidStatusMessage" value="The VDB is Active"/>
+
+<model name="views" type="VIRTUAL">
+<metadata type="DDL">
+<![CDATA[CREATE VIEW testDS1View (
+	state string,
+	state_code string,
+	PRIMARY KEY(state_code)
+)
+AS
+SELECT state, state_code FROM states;
+]]>
+
+</metadata>
+</model>
+<model name="test1" type="PHYSICAL">
+<source name="ds1-DS1" translator-name="mysql" connection-jndi-name="java:/MySqlDS"/>
+<metadata type="DDL">
+<![CDATA[CREATE FOREIGN TABLE states (
+	state string(22) NOT NULL OPTIONS ("NAMEINSOURCE" '`state`', "NATIVE_TYPE" 'VARCHAR'),
+	state_code string(2) NOT NULL OPTIONS ("NAMEINSOURCE" '`state_code`', "NATIVE_TYPE" 'CHAR')
+) OPTIONS ("UPDATABLE" 'TRUE', "NAMEINSOURCE" '`states`');
+]]>
+
+</metadata>
+</model>
+
+</vdb>
