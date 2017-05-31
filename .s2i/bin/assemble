@@ -24,10 +24,13 @@ fi
 
 # Change to JBOSS HOME
 cd ${JBOSS_HOME}
-unzip ${TEIID_ZIP}
+unzip ${TEIID_ZIP} > /dev/null
 rm ${JBOSS_HOME}/${TEIID_ZIP}
 
 # Copy wildfly configuration
 cp -rf ${HOME}/contrib/wfcfg/* ${JBOSS_HOME}/standalone/configuration/
+
+# Copy deployments manually since only wars, jars etc... are automatically copied by wildfly layer
+cp -rf ${HOME}/deployments/* ${JBOSS_HOME}/standalone/deployments/
 
 exit $rc
