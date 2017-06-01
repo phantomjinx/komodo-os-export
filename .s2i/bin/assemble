@@ -1,12 +1,12 @@
 #!/bin/bash
 
 JBOSS_HOME=/wildfly
+CONFIG_FILE=${JBOSS_HOME}/standalone/configuration/standalone.xml
 TEIID_VERSION=9.2.3
 TEIID_ZIP=teiid-${TEIID_VERSION}-wildfly-dist.zip
 TEIID_URL=https://repository.jboss.org/nexus/service/local/repositories/releases/content/org/jboss/teiid/teiid/${TEIID_VERSION}/${TEIID_ZIP}
 
-echo "Before assembling"
-
+# Execute the wildfly assembly
 /usr/libexec/s2i/assemble
 rc=$?
 
@@ -15,6 +15,7 @@ if [ $rc -ne 0 ]; then
   exit $rc
 fi
 
+# Download the teiid wildfly distribution
 curl -o ${JBOSS_HOME}/${TEIID_ZIP} ${TEIID_URL}
 
 if [ ! -f ${JBOSS_HOME}/${TEIID_ZIP} ]; then
@@ -22,13 +23,50 @@ if [ ! -f ${JBOSS_HOME}/${TEIID_ZIP} ]; then
   exit 1;
 fi
 
-# Change to JBOSS HOME
+# Change to JBOSS HOME and unzip the teiid distribution
 cd ${JBOSS_HOME}
 unzip ${TEIID_ZIP} > /dev/null
 rm ${JBOSS_HOME}/${TEIID_ZIP}
 
 # Copy wildfly configuration
 cp -rf ${HOME}/contrib/wfcfg/* ${JBOSS_HOME}/standalone/configuration/
+
+# Configure teiid user
+teiidUser=user
+teiidPswd=user1234!
+
+if [ -n "${TEIID_USERNAME}" ]; then
+  teiidUser=${TEIID_USERNAME}
+else
+  echo "WARNING! No username specified for TEIID_USERNAME. Using default '${teiidUser}'"
+fi
+
+if [ -n "${TEIID_PASSWORD}" ]; then
+  teiidPswd=${TEIID_PASSWORD}
+else
+  echo "WARNING! No password specified for TEIID_PASSWORD. Using insecure default"
+fi
+
+echo "INFO: Adding Teiid user"
+$JBOSS_HOME/bin/add-user.sh -u "${teiidUser}" -p "${teiidPswd}" -a -g user,odata
+
+# Try and configure HTTPS
+HTTPS_REALM="<!-- No HTTPS Realm configured -->"
+HTTPS_LISTENER="<!-- No HTTPS Listener configured -->"
+if [ -n "${HTTPS_NAME}" -a -n "${HTTPS_PASSWORD}" -a -n "${HTTPS_KEYSTORE_DIR}" -a -n "${HTTPS_KEYSTORE}" ] ; then
+
+  HTTPS_REALM="<security-realm name=\"SSLRealm\"><server-identities><ssl protocol=\"TLS\"><keystore path=\"${HTTPS_KEYSTORE_DIR}/${HTTPS_KEYSTORE}\" keystore-password=\"${HTTPS_PASSWORD}\" alias=\"${HTTPS_NAME}\"/></ssl></server-identities><authentication><truststore path=\"${HTTPS_KEYSTORE_DIR}/${HTTPS_KEYSTORE}\" keystore-password=\"${HTTPS_PASSWORD}\"/></authentication></security-realm>"
+
+  HTTPS_LISTENER="<https-listener name=\"https\" socket-binding=\"https\" security-realm=\"SSLRealm\"/>"
+
+  echo "INFO: HTTPS values are good, adding to server configuration"
+
+elif [ -n "${HTTPS_NAME}" -o -n "${HTTPS_PASSWORD}" -o -n "${HTTPS_KEYSTORE_DIR}" -o -n "${HTTPS_KEYSTORE}" ] ; then
+  echo "WARNING! Partial HTTPS configuration, the https connector WILL NOT be configured."
+fi
+
+sed -i "s|<!-- ##HTTPS-REALM## -->|${HTTPS_REALM}|" $CONFIG_FILE
+sed -i "s|<!-- ##HTTPS-LISTENER## -->|${HTTPS_LISTENER}|" $CONFIG_FILE
 
 # Copy deployments manually since only wars, jars etc... are automatically copied by wildfly layer
 cp -rf ${HOME}/deployments/* ${JBOSS_HOME}/standalone/deployments/
