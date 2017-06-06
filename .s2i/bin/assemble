@@ -5,6 +5,8 @@ CONFIG_FILE=${JBOSS_HOME}/standalone/configuration/standalone.xml
 TEIID_VERSION=9.2.3
 TEIID_ZIP=teiid-${TEIID_VERSION}-wildfly-dist.zip
 TEIID_URL=https://repository.jboss.org/nexus/service/local/repositories/releases/content/org/jboss/teiid/teiid/${TEIID_VERSION}/${TEIID_ZIP}
+BINDIR=${HOME}/.s2i/bin
+ENV_FILES=${HOME}/datasources.properties
 
 # Execute the wildfly assembly
 /usr/libexec/s2i/assemble
@@ -70,5 +72,17 @@ sed -i "s|<!-- ##HTTPS-LISTENER## -->|${HTTPS_LISTENER}|" $CONFIG_FILE
 
 # Copy deployments manually since only wars, jars etc... are automatically copied by wildfly layer
 cp -rf ${HOME}/deployments/* ${JBOSS_HOME}/standalone/deployments/
+
+#
+# Configure datasources
+#
+# Adapted from the datavirt 6.3 launch scripts for processing datasources
+#
+CONFIGURE_SCRIPTS=(
+  ${BINDIR}/launch/datasource.sh
+)
+
+echo "INFO: Adding datasources"
+source ${BINDIR}/launch/configure.sh
 
 exit $rc

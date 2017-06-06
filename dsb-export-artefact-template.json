@@ -15,20 +15,13 @@
         "template": "dsbex-secure-s2i",
         "xpaas": "1.0.0"
     },
-    "message": "A new data service has been created in your project.  The username/password for accessing the service is ${TEIID_USERNAME}/${TEIID_PASSWORD}.  Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secrets: \"${CONFIGURATION_NAME}\" containing the datasource configuration details required by the deployed VDB(s); \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
+    "message": "A new data service has been created in your project.  The username/password for accessing the service is ${TEIID_USERNAME}/${TEIID_PASSWORD}.  Please be sure to create the \"${SERVICE_ACCOUNT_NAME}\" service account and the following secret: \"${HTTPS_SECRET}\" containing the ${HTTPS_KEYSTORE} file used for serving secure content.",
     "parameters": [
         {
             "description": "The name for the application.",
             "displayName": "Application Name",
             "name": "APPLICATION_NAME",
             "value": "dsbex-app",
-            "required": true
-        },
-        {
-            "description": "The name of the secret containing configuration properties for the data sources.",
-            "displayName": "Configuration Secret Name",
-            "name": "CONFIGURATION_NAME",
-            "value": "dsbex-app-config",
             "required": true
         },
         {
@@ -46,7 +39,7 @@
             "required": false
         },
         {
-            "description": "The name of the service account to use for the deployment.  The service account should be configured to allow usage of the secret(s) specified by CONFIGURATION_NAME and HTTPS_SECRET.",
+            "description": "The name of the service account to use for the deployment.  The service account should be configured to allow usage of the secret specified by HTTPS_SECRET.",
             "displayName": "Service Account Name",
             "name": "SERVICE_ACCOUNT_NAME",
             "value": "dsbex-service-account",
@@ -417,11 +410,6 @@
                                 "imagePullPolicy": "Always",
                                 "volumeMounts": [
                                     {
-                                        "name": "configuration",
-                                        "mountPath": "/etc/${APPLICATION_NAME}-environment",
-                                        "readOnly": true
-                                    },
-                                    {
                                         "name": "${APPLICATION_NAME}-keystore-volume",
                                         "mountPath": "/etc/${APPLICATION_NAME}-secret-volume",
                                         "readOnly": true
@@ -509,12 +497,6 @@
                             }
                         ],
                         "volumes": [
-                            {
-                                "name": "configuration",
-                                "secret": {
-                                    "secretName": "${CONFIGURATION_NAME}"
-                                }
-                            },
                             {
                                 "name": "${APPLICATION_NAME}-keystore-volume",
                                 "secret": {

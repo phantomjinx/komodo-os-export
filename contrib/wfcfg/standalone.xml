@@ -136,14 +136,7 @@
         <subsystem xmlns="urn:jboss:domain:bean-validation:1.0"/>
         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
-                <datasource jndi-name="java:jboss/datasources/ExampleDS" pool-name="ExampleDS" enabled="true" use-java-context="true">
-                    <connection-url>jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE</connection-url>
-                    <driver>h2</driver>
-                    <security>
-                        <user-name>sa</user-name>
-                        <password>sa</password>
-                    </security>
-                </datasource>
+                <!-- ##DATASOURCES## -->
                 <drivers>
                     <driver name="h2" module="com.h2database.h2">
                         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
@@ -209,11 +202,7 @@
                 <passivation-store name="infinispan" cache-container="ejb" max-size="10000"/>
             </passivation-stores>
             <async thread-pool-name="default"/>
-            <timer-service thread-pool-name="default" default-data-store="default-file-store">
-                <data-stores>
-                    <file-data-store name="default-file-store" path="timer-service-data" relative-to="jboss.server.data.dir"/>
-                </data-stores>
-            </timer-service>
+            <!-- ##TIMER_SERVICE## -->
             <remote connector-ref="http-remoting-connector" thread-pool-name="default"/>
             <thread-pools>
                 <thread-pool name="default">

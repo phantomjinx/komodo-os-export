@@ -83,16 +83,11 @@ oc get sa/${OPENSHIFT_SERVICE_ACCOUNT} -o json | grep ${OPENSHIFT_APP_SECRET} 2>
 	oc secrets link ${OPENSHIFT_SERVICE_ACCOUNT} ${OPENSHIFT_APP_SECRET} || \
 	{ echo "FAILED: could not link secret to service account" && exit 1; }
 
-echo -e '\n\n=== Adding datasource properties ==='
-oc get secret "${OPENSHIFT_APPLICATION_NAME}-config" 2>&1 > /dev/null || \
-    oc secrets new "${OPENSHIFT_APPLICATION_NAME}-config" datasources.properties  || { echo "FAILED" && exit 1; }
-
 echo -e '\n\n=== Deploying wildfly app from template with default values ==='
 oc get dc/${OPENSHIFT_APPLICATION_NAME} 2>&1 >/dev/null || \
 	oc new-app ${OS_TEMPLATE} \
 		--name=${OPENSHIFT_APPLICATION_NAME} \
 		--param=APPLICATION_NAME=${OPENSHIFT_APPLICATION_NAME} \
-		--param=CONFIGURATION_NAME="${OPENSHIFT_APPLICATION_NAME}-config" \
 		--param=SOURCE_REPOSITORY_URL=${SOURCE_REPOSITORY_URL} \
 		--param=SOURCE_REPOSITORY_REF=${SOURCE_REPOSITORY_REF} \
 		--param=SERVICE_ACCOUNT_NAME=${OPENSHIFT_SERVICE_ACCOUNT} \

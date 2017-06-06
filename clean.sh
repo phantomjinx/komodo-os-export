@@ -57,7 +57,6 @@ oc delete sa ${OPENSHIFT_SERVICE_ACCOUNT} || { echo "WARNING: Could not delete o
 
 # Delete secrets
 oc delete secret ${OPENSHIFT_APP_SECRET} || { echo "WARNING: Could not delete old secrets" ; }
-oc delete secret "${OPENSHIFT_APPLICATION_NAME}-config" || { echo "WARNING: Could not delete old secrets" ; }
 
 # Delete application resources
 oc delete all -l app=${OPENSHIFT_APPLICATION_NAME}  || { echo "WARNING: Could not delete old application resources" ; }
