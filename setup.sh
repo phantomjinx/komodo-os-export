@@ -51,15 +51,15 @@ fi
 #
 # Check that we have a server keystore for https
 #
-#if [ ! -f ${WILDFLY_KEYSTORE_DIR}/${WILDFLY_KEYSTORE_DEFAULT} ]; then
-#    echo -e '\n\n === HTTPS keystore has not been generated. ==='
-#    echo -e '\tNavigate to security/intermediate/ca.'
-#    echo -e '\tExecute ./create-certificate.sh -d <domain>'
-#    echo -e '\t\twhere domain is the name of the https route.'
-#    echo -e '\t\t\tThis is in the format "secure-dsb-openshift-dsb.rhel-cdk.x.x.x.x.xip.io"'
-#    echo -e '\t\t\twhere x.x.x.x is the ip address of the openshift instance, eg. 10.1.1.2'
-#    exit 1
-#fi
+if [ ! -f ${WILDFLY_KEYSTORE_DIR}/${WILDFLY_KEYSTORE_DEFAULT} ]; then
+    echo -e '\n\n === HTTPS keystore has not been generated. ==='
+    echo -e '\tNavigate to security/intermediate/ca.'
+    echo -e '\tExecute ./create-certificate.sh -d <domain>'
+    echo -e '\t\twhere domain is the name of the https route.'
+    echo -e '\t\t\tThis is in the format "secure-dsb-openshift-dsb.rhel-cdk.x.x.x.x.xip.io"'
+    echo -e '\t\t\twhere x.x.x.x is the ip address of the openshift instance, eg. 10.1.1.2'
+    exit 1
+fi
 
 echo -e '\n\n=== logging into oc tool as user ==='
 oc login ${OS_HOST} -u ${OPENSHIFT_USER} -p ${OPENSHIFT_USER_PASSWD}
@@ -85,7 +85,7 @@ oc get sa/${OPENSHIFT_SERVICE_ACCOUNT} -o json | grep ${OPENSHIFT_APP_SECRET} 2>
 
 echo -e '\n\n=== Deploying wildfly app from template with default values ==='
 oc get dc/${OPENSHIFT_APPLICATION_NAME} 2>&1 >/dev/null || \
-	oc new-app ${OS_TEMPLATE} \
+	oc new-app dsb-export-artefact-template.json \
 		--name=${OPENSHIFT_APPLICATION_NAME} \
 		--param=APPLICATION_NAME=${OPENSHIFT_APPLICATION_NAME} \
 		--param=SOURCE_REPOSITORY_URL=${SOURCE_REPOSITORY_URL} \

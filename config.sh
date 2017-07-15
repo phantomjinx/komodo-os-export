@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# OS settings
-OS_TEMPLATE=dsb-export-artefact-template.json
-
 ## Default credentials for minishift
 OPENSHIFT_USER=developer
 OPENSHIFT_USER_PASSWD=developer

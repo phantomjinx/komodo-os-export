@@ -44,12 +44,6 @@ oc login https://$OS_HOST:8443 -u ${OPENSHIFT_USER} -p ${OPENSHIFT_USER_PASSWD}
 oc whoami 2>&1 > /dev/null || { echo "Cannot log in ... exiting" && exit 1; }
 
 echo "	--> delete all openshift resources"
-# Delete datavirt image
-#oc delete is ${DATAVIRT_IMG} || { echo "WARNING: Could not delete old image" ; }
-
-# Delete openshirt template
-#oc project openshift
-#oc delete template ${OS_TEMPLATE} || { echo "WARNING: Could not delete old application template" ; }
 
 # Delete service account
 oc project ${OPENSHIFT_PROJECT}
